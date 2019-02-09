@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NLmaps</title>
+ 
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+		<link rel="stylesheet" href="main.css"> 
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->		
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap/bootstrap.min.js"></script>
+		<script type="text/javascript" src="js/bootstrap/active_nav.js"></script>
+		<!-- Bootstrap End -->
+		
+		<link rel="shortcut icon" href="favicon.ico"/>
+  </head>
+	
+  <body>
+
+		<div class="container">	
+			<nav class="navbar navbar-inverse">
+				<div class="container-fluid">
+					<div class="navbar-header">
+						<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+							<span class="sr-only">Toggle navigation</span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</button>
+					</div>
+					
+					<div id="navbar" class="navbar-collapse collapse">
+						<ul class="nav navbar-nav">
+							<li><a href="index.html">
+								Home <span aria-hidden="true"></span>
+							</a></li>
+							<li><a href="faq.html">
+								FAQ <span aria-hidden="true"></span>
+							</a></li>
+						</ul>
+						<ul class="nav navbar-nav navbar-right">
+							<li class="active"><a href="about.html">
+								About <span aria-hidden="true"></span>
+							</a></li>
+							<li><a href="feedback.html">
+								Feedback <span aria-hidden="true"></span>
+							</a></li>
+							<li><a href="contact.html">
+								Contact <span aria-hidden="true"></span>
+							</a></li>
+						</ul>
+					</div><!--/.nav-collapse -->
+				</div><!--/.container-fluid -->
+			</nav>
+		</div>
+			
+		<div id="wrap">
+
+			<div class="container">
+				<div class="jumbotron" id="jumb">
+					<div class="container">
+						<div class="row center">
+							<div class="col-md-3">
+							</div>
+							<div class="col-md-2"></div>
+							<div class="col-md-4">
+								<h1>NLmaps</h1>
+							</div>
+							<div class="col-md-3"></div>
+						</div> 
+					</div>
+				</div> 
+
+				<div class="main-content">						
+					<div class="featurette">					
+						<div class="featurette-inner small_font">
+							<h2> About </h2>
+							<p> <a href="http://www.openstreetmap.org" target="_blank">OpenStreetMap</a> (OSM) is a community-built database of geographic data, 
+									containing user contributed local and up-to-date information about landmarks all over the world. Our tool, NLmaps, enables a
+									sophisticated search of the database via an interface that supports questions phrased in natural language. </p>			
+							<br/><h2> Licence Notes </h2>
+							<p> The OSM related data is available under the <a href="http://www.openstreetmap.org/copyright" target="_blank">Open Database Licence</a></p>
+							<p> A <a href="https://github.com/carhaas/cdec-semparse" target="_blank">semantic parser</a> (available under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html" target="_blank">Apache License 2.0</a>) based on Statistical Machine Translation (SMT) and the <a href="http://www.cl.uni-heidelberg.de/statnlpgroup/nlmaps/" target="_blank">NLmaps v2 corpus</a> (available under a
+							<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International</a>) were used to create this tool. 
+							The released corpus consists of 28,609 questions, each with a corresponding Machine Readable Formula (MRL) with which the correct answer can be found if executed against the OSM database.</p>
+							<p>The <a href="https://github.com/carhaas/overpass-nlmaps" target="_blank">NLmaps backend</a> 
+							(available under the <a href="http://www.gnu.org/licenses/agpl-3.0.en.html" target="_blank">Affero GPL v3</a>) 
+							may be used to obtain an answer to a corresponding MRL formula. It is based on based on the <a href="https://github.com/drolbr/Overpass-API" target="_blank">Overpass-API</a> 
+							(also available under the <a href="http://www.gnu.org/licenses/agpl-3.0.en.html" target="_blank">Affero GPL v3</a>).</p>
+							<br/><h2> Acknowledgments </h2>
+							<p>We would like to thank the OSM developers Roland Olbricht and Martin Raifer for their support. </p>
+							<p>The work was in part supported by the grant RI-2221/2-1 for the project "Grounding Statistical Machine Translation in Perception and Action" funded by the Deutsche Forschungsgemeinschaft (DFG). </p>
+						</div>
+					</div>									
+				</div> 				
+			</div>
+
+    
+    </div>
+	
+  </body>
+</html>

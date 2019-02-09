@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NLmaps</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap/active_nav.js"></script>
+    <!-- Bootstrap End -->
+
+    <link rel="shortcut icon" href="favicon.ico" />
+
+    <script>
+        $(document).ready(function() {
+            $(function() {
+                $('#feedback_form').submit(function(e) {
+                    $.ajax({
+                        url: "../cgi-bin/save_website_feedback.cgi",
+                        type: "post",
+                        datatype: "json",
+                        data: $("#feedback_form").serialize(),
+                        success: function(response) {},
+                        error: function(err) {}
+                    });
+                    document.getElementById("feedback_thanks").innerHTML = "<p>Thank you!</p>";
+                    return false;
+                });
+            });
+        });
+    </script>
+</head>
+
+<body>
+
+    <div class="container">
+        <nav class="navbar navbar-inverse">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+
+                <div id="navbar" class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a href="index.html">
+								Home <span aria-hidden="true"></span>
+							</a></li>
+                        <li><a href="faq.html">
+								FAQ <span aria-hidden="true"></span>
+							</a></li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="about.html">
+								About <span aria-hidden="true"></span>
+							</a></li>
+                        <li class="active"><a href="feedback.html">
+								Feedback <span aria-hidden="true"></span>
+							</a></li>
+                        <li><a href="contact.html">
+								Contact <span aria-hidden="true"></span>
+							</a></li>
+                    </ul>
+                </div>
+                <!--/.nav-collapse -->
+            </div>
+            <!--/.container-fluid -->
+        </nav>
+    </div>
+
+    <div id="wrap">
+
+        <div class="container">
+            <div class="jumbotron" id="jumb">
+                <div class="container">
+                    <div class="row center">
+                        <div class="col-md-3">
+                        </div>
+                        <div class="col-md-2"></div>
+                        <div class="col-md-4">
+                            <h1>NLmaps</h1>
+                        </div>
+                        <div class="col-md-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="featurette">
+                    <div class="featurette-inner">
+                        <h2> Feedback </h2>
+                        <br/>
+                        <div class="row center">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-8">
+                                <form role="form" id="feedback_form" name="feedback_form">
+                                    <div class="form-group">
+                                        <label for="comment">Is there anything you think we should improve on this website? If so, tell us below!</label>
+                                        <textarea class="form-control" rows="7" id="comment" name="comment"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-default">Submit</button>
+                                </form>
+                            </div>
+                            <div class="col-md-2"></div>
+                        </div>
+                        <div id="feedback_thanks"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

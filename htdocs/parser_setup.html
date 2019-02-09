@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NLmaps</title>
+ 
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+		<link rel="stylesheet" href="main.css"> 
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->		
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap/bootstrap.min.js"></script>
+		<script type="text/javascript" src="js/bootstrap/active_nav.js"></script>
+		<!-- Bootstrap End -->
+		
+		<link rel="shortcut icon" href="favicon.ico"/>
+  </head>
+	
+  <body>
+
+		<div class="container">	
+			<nav class="navbar navbar-inverse">
+				<div class="container-fluid">
+					<div class="navbar-header">
+						<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+							<span class="sr-only">Toggle navigation</span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</button>
+					</div>
+					
+					<div id="navbar" class="navbar-collapse collapse">
+						<ul class="nav navbar-nav">
+							<li><a href="index.html">
+								Home <span aria-hidden="true"></span>
+							</a></li>
+							<li><a href="faq.html">
+								FAQ <span aria-hidden="true"></span>
+							</a></li>
+						</ul>
+						<ul class="nav navbar-nav navbar-right">
+							<li class="active"><a href="about.html">
+								About <span aria-hidden="true"></span>
+							</a></li>
+							<li><a href="feedback.html">
+								Feedback <span aria-hidden="true"></span>
+							</a></li>
+							<li><a href="contact.html">
+								Contact <span aria-hidden="true"></span>
+							</a></li>
+						</ul>
+					</div><!--/.nav-collapse -->
+				</div><!--/.container-fluid -->
+			</nav>
+		</div>
+			
+		<div id="wrap">
+
+			<div class="container">
+				<div class="jumbotron" id="jumb">
+					<div class="container">
+						<div class="row center">
+							<div class="col-md-3">
+							</div>
+							<div class="col-md-2"></div>
+							<div class="col-md-4">
+								<h1>NLmaps</h1>
+							</div>
+							<div class="col-md-3"></div>
+						</div> 
+					</div>
+				</div> 
+
+				<div class="main-content">						
+					<div class="featurette">					
+						<div class="featurette-inner small_font">
+							<h2> Connect your own Parser </h2>
+							<p> If you have your own NLmaps semantic parser, you can connect it to the interface. </p>
+                            <p> The interface will handle every aspect, except for turning a question (e.g. "How many hospitals are there in Heidelberg?") into a NLmaps MRL (e.g. "query(area(keyval('name','Heidelberg')),nwr(keyval('amenity','hospital')),qtype(count))").
+                            For this step, the interface will connect with the URL that you specified in the box after clicking on 'Select a Parser'. On your end, you will have to accept a get request. The question is send as the value of "question" (e.g. <code>http://127.0.0.1:5000/?question=How%20many%20historic%20sites%20are%20in%20the%20east%20of%20Nantes%3F</code>) and you have to unquote it. Then you can hand the question over to your parser. Once your parser returns a MRL, you send the MRL back as your response. The interface will then turn your MRL into an answer and display it.</p>
+                            <p>Here is a minimal example using Flask (install via <code>pip install flask</code>):</p>
+                            <pre class="programlisting"><code>
+from flask import Flask, request
+import urllib2
+
+app = Flask(__name__)
+@app.route('/parser', methods=['GET'])
+def result():
+    question_quoted = request.args.get("question")
+    question = urllib2.unquote(question_quoted)
+    print(question)
+    
+    # You semantic parser goes here, it converts a question into a MRL
+    # E.g. "How many hospitals are there in Heidelberg" is turned into
+    # "query(area(keyval('name','Heidelberg')),nwr(keyval('amenity','hospital')),qtype(count))"
+    mrl = "query(area(keyval('name','Heidelberg')),nwr(keyval('amenity','hospital')),qtype(count))"
+    # Simply return the MRL and the web service will handle the rest
+    
+    return mrl                            
+                            </code></pre>
+                            <p> The above code can then be run by executing <code>export FLASK_APP=receive_request.py</code>, followed by <code>python -m flask run --host=0.0.0.0</code>.
+                            To connect the web interface to your parser, simply enter <code>http://your-ip-address:5000/parser</code> in the box that pops up when you click on 'Select Parser'. Note that you need to have a working web server, such as Apache, installed.</p>
+                            <p>If everything is configured correctly, the above dummy code will always execute the MRL "query(area(keyval('name','Heidelberg')),nwr(keyval('amenity','hospital')),qtype(count))" irrespective of the question entered. The displayed answer should be "41". Next, replace the dummy code with your own parser.</p>
+                            <p>This feature is in BETA stage, if you run into any problems or have any questions feel free to <a href="mailto:lawrence@cl.uni-heidelberg.de?Subject=NLmaps: Connecting a different Parser" target="_top">contact me</a>.</p>
+						</div>
+					</div>									
+				</div> 				
+			</div>
+
+    
+    </div>
+	
+  </body>
+</html>

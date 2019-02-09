@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>NLmaps</title>
+ 
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+		<link rel="stylesheet" href="main.css"> 
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->		
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap/bootstrap.min.js"></script>
+		<script type="text/javascript" src="js/bootstrap/active_nav.js"></script>
+		<link href="css/bootstrap-switch.min.css" rel="stylesheet">
+		<script src="js/bootstrap/bootstrap-switch.min.js"></script>
+		<!-- Bootstrap End -->
+		
+		<!-- Leaflet -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+		<script type="text/javascript" src="lib/leaflet/leafletembed.js"></script>
+		
+		<link rel="shortcut icon" href="favicon.ico"/>
+		
+		
+		<script>		
+			$(document).ready(function(){
+				$('[data-toggle="tooltip_count"]').tooltip();
+				$('[data-toggle="tooltip_findkey"]').tooltip();
+				$('[data-toggle="tooltip_latlong"]').tooltip();
+				$('[data-toggle="tooltip_least"]').tooltip();
+				$('[data-toggle="tooltip_dist"]').tooltip();
+				$('[data-toggle="tooltip_reference"]').tooltip();   
+				$('.feedback_more').on('click', function(){
+					$("#myModal").modal();
+				});    
+				$('.different_parser_more').on('click', function(){
+					$("#myModal2").modal();
+				}); 
+				$('.feedback').on('click', function(){
+					var id_clicked = $(this).find('input').attr('id');
+					var helpful = "";
+						if(id_clicked=="helpful_no"){
+							helpful = "no";
+						} else if(id_clicked=="helpful_yes"){
+							helpful = "yes";
+						} else {
+							return false;
+						}
+						$.ajax({
+							url: "../cgi-bin/save_feedback.cgi",
+							type: "post",
+							datatype:"json",
+							data: {'helpful':helpful,'question':question,'answer':answer,'mrl':mrl},
+							success: function(response){
+							},
+							error: function(err) {
+							}
+						});
+				}); 
+                var parser_to_use = "default"
+				var osm_map = new OSMmap();
+				var xhr;
+				var question = "";
+				var mrl = "";
+				var answer = "";
+				var user_lat = 1000;
+				var user_lon = 1000;
+				var click = 0;
+				var prep_form = "";
+				var using_location_button = 0;
+				function backOffNominatim(question) {
+					var ask_nominatim = "http://open.mapquestapi.com/nominatim/v1/search.php?key=API_KEY&format=json&q="+question;
+					$.ajax({
+						url: ask_nominatim,
+						type: "post",
+						datatype:"json",
+						success: function(response){
+							if(jQuery.isEmptyObject(response)){
+								document.getElementById("answer_output").innerHTML = "<p>Sorry, we couldn't find an answer for your question.</p>";
+							} else {
+								var collect_answer = "";
+								geojsonFeature = {};
+								geojsonFeature.lat = response[0].lat;
+								geojsonFeature.lon = response[0].lon;								
+								geojsonFeature.features = response;
+								for (var i = 0; i < response.length; i++) {
+									var osm_type = "N";
+									if(response[i].osm_type = "way"){
+										osm_type = "W";
+									} else if(response[i].osm_type = "relation"){
+										osm_type = "R";
+									}
+									var write_json = '{"search_word":"'+response[i].osm_id
+										+'","geometry":{"type":"Point","coordinates":['
+										+response[i].lon+','
+										+response[i].lat
+										+']},"type":"Feature","properties":{"popupContent":"<b>'
+										+response[i].display_name+'</b><br/><b>lat</b> '
+										+response[i].lat+' <b>lon</b> '
+										+response[i].lon+'"},"osm_id":"'
+										+osm_type+response[i].osm_id+'"}';
+									if("display_name" in response[i]){
+										if(i!=0){ collect_answer += "<br/>"; }
+										collect_answer += '<a href="javascript:void(0)" id="'+response[i].osm_id+'">'+response[i].display_name+'</a>';	
+									}
+									geojsonFeature.features[i] = JSON.parse(write_json);
+								}
+								osm_map.update_map(geojsonFeature);
+								document.getElementById("answer_output").innerHTML = collect_answer;
+							}
+						},
+						error: function(err) {
+							document.getElementById("answer_output").innerHTML = "<p>Sorry, we couldn't find an answer for your question.</p>";
+						}
+					});
+				}
+				function sendQuery(form_data) {
+					document.getElementById("answer_output").innerHTML = '<img id="load" src="images/loading.gif" style="display:block; margin-left:auto; margin-right:auto;">';
+					$("#load").hide().css({visibility: "visible"}).fadeIn("slow");
+					document.getElementById("repeat_question").value = document.getElementById("question").value;
+					xhr = $.ajax({
+						url: "../cgi-bin/query.cgi",
+						type: "post",
+						datatype:"json",
+						data: form_data,
+						success: function(response){
+							$("#load").show().css({visibility: "hidden"});			
+							if(response.hasOwnProperty("question")){ question = response.question; }
+							if(response.hasOwnProperty("mrl")){ mrl = response.mrl; }			
+							if(response.sorry){
+								backOffNominatim(document.getElementById("question").value);
+							} else if(response.hasOwnProperty("answer") && response.hasOwnProperty("latlong")) {
+								var collect_answer = "";
+								var collect_answer_simple = "";
+								for (var i = 0; i < response.answer.length; i++) { 
+									if(i!=0){ collect_answer += ", "; collect_answer_simple += ", "; }
+									collect_answer_simple += response.answer[i];
+									collect_answer += '<a href="javascript:void(0)" id="'+response.answer[i]+'">'+response.answer[i]+'</a>';
+								}
+								answer = collect_answer_simple;
+								if(response.latlong.findkey == "yes" && !collect_answer_simple.startsWith("We couldn")) {
+									document.getElementById("answer_output").innerHTML = "<p>"+collect_answer+"</p>";
+								} else {
+									document.getElementById("answer_output").innerHTML = "<p>"+collect_answer_simple+"</p>";
+								}
+								$("#helpful_inner").toggleClass('hidden', false);
+								$("#helpful_group_more_span").toggleClass('hidden', false);
+								osm_map.update_map(response.latlong);
+							} else {
+								backOffNominatim(document.getElementById("question").value);						
+							}
+							if(response.hasOwnProperty("latlong")){
+								if(response.latlong.hasOwnProperty("location")) { document.getElementById("area_feedback_text").value = response.latlong.location; }
+								if(response.latlong.hasOwnProperty("qtype")) { document.getElementById("qtype_feedback_text").value = response.latlong.qtype; }
+								if(response.latlong.hasOwnProperty("osmtags")) { document.getElementById("osm_tag_feedback_text").value = response.latlong.osmtags; }
+								if(response.latlong.hasOwnProperty("overpass")) { document.getElementById("overpass_feedback_text").value = response.latlong.overpass; }
+							}
+							if(response.hasOwnProperty("mrl")) { 
+								if(response.mrl == "no mrl found"){
+									document.getElementById("mrl_feedback_text").value = "";
+									document.getElementById("mrl_feedback_text").placeholder = response.mrl;								
+								} else {
+									document.getElementById("mrl_feedback_text").value = response.mrl;
+								}
+							}
+							$("#helpful_group_more_span").toggleClass('hidden', false);
+						},
+						error: function(err) {
+							$("#load").show().css({visibility: "hidden"});
+							console.log("Error 3: %s" % err);
+							document.getElementById("answer_output").innerHTML = "<p>Sorry, there was an error trying to process your request, please try again.</p>";		
+						}
+					});
+				}
+				$('.get_location').on('click', function(){		
+					//get user locations
+					if(using_location_button == 0){
+						if (navigator.geolocation) {
+							var startPos;
+							var geoOptions = {
+								maximumAge: 5 * 60 * 1000,
+								timeout: 10 * 1000
+							}
+							var geoSuccess = function(position) {
+								startPos = position;
+								user_lat = startPos.coords.latitude;
+								user_lon = startPos.coords.longitude;
+								osm_map.update_map_center(user_lat, user_lon);
+							};
+							var geoError = function(position) {
+								document.getElementById("spelling_suggest").innerHTML = 'Sorry, we were unable to locate you';
+								using_location_button = 0;
+								$('span', this).text('Use my location');
+								$("#ref_point").removeAttr("disabled"); 
+								document.getElementById("spelling_suggest").innerHTML = "";
+							};
+							navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geoOptions);
+						} else {
+							document.getElementById("spelling_suggest").innerHTML = "Sorry, your browser doesn't support geolocating";
+							using_location_button = 0;
+							$('span', this).text('Use my location');
+							$("#ref_point").removeAttr("disabled"); 
+							document.getElementById("spelling_suggest").innerHTML = "";
+						}
+					}
+					if(using_location_button == 0){
+						using_location_button = 1;
+						$('span', this).text('Using location');
+						$("#ref_point").attr("disabled", "disabled");
+						document.getElementById("ref_point").value = "";
+						document.getElementById("spelling_suggest").innerHTML = 'Warning: Do not use a reference point in the question now!';
+					} else {
+						using_location_button = 0;
+						$('span', this).text('Use my location');
+						$("#ref_point").removeAttr("disabled"); 
+						document.getElementById("spelling_suggest").innerHTML = "";
+					}    
+				});
+				$('#ref_point').on('input', function() {
+					if(document.getElementById("ref_point").value == ""){
+						document.getElementById("spelling_suggest").innerHTML = '';
+					} else {
+						document.getElementById("spelling_suggest").innerHTML = 'Warning: Do not use a reference point in the question now!';
+					}
+				});
+				(function(){
+					var resources = document.getElementById('answer_output');
+					resources.addEventListener('click',handler,false);
+					function handler(e){
+						if (e.target !== e.currentTarget && e.target.id) {
+							var clickedItem = e.target.id;
+							osm_map.open_popup(clickedItem);
+						}
+						e.stopPropagation();
+					};
+				})();
+				(function(){
+					var resources = document.getElementById('spelling_suggest');
+					resources.addEventListener('click',handler,false);
+					function handler(e){
+						var updated_question = document.getElementById("updated_question_link").innerHTML;
+						document.getElementById("spelling_suggest").innerHTML = '';
+						if(xhr && xhr.readyState != 4){	
+							xhr.abort();
+						}
+						prep_form.a_question=updated_question;
+						sendQuery(prep_form);
+					};
+				})();
+				$(function(){
+					$('#question_form').submit(function(e){
+						var use_user_gps = 0;
+						if($('#user_gps_button').is(':checked')){
+							use_user_gps = 1;
+						} else {
+							use_user_gps = 0;
+						}
+						osm_map.clear_map(); //reset map						
+						//reset modal form values
+						document.getElementById("repeat_question").value = "";
+						document.getElementById("area_feedback_text").value = "";
+						document.getElementById("qtype_feedback_text").value = "";
+						document.getElementById("osm_tag_feedback_text").value = "";
+						document.getElementById("overpass_feedback_text").value = "";
+						document.getElementById("mrl_feedback_text").value = "";
+						$("#helpful_inner").toggleClass('hidden', true);
+						$("#helpful_group_more_span").toggleClass('hidden', true);
+						$("#helpful_inner_thanks").toggleClass('hidden', true);			
+						$('.feedback').removeClass("active");
+						$('.feedback_more').removeClass("active");
+						//reset the feedback buttons
+						if ($('#helpful_no').hasClass("active")) { $('#helpful_no').removeClass('active'); }
+						if ($('#helpful_no').hasClass("active")) { $('#helpful_no').removeClass('active'); }
+						document.getElementById("spelling_suggest").innerHTML = "";
+						document.getElementById("answer_output").innerHTML = '<img id="load" src="images/loading.gif" style="display:block; margin-left:auto; margin-right:auto;">';
+						$("#load").hide().css({visibility: "visible"}).fadeIn("slow");
+						e.preventDefault();
+						var start = new Date().getTime();
+						if(user_lat != 1000 && user_lon != 1000 && use_user_gps == 1){
+							prep_form = {'ref_point':document.getElementById("ref_point").value,'a_question':document.getElementById("question").value,'user_lat':user_lat,'user_lon':user_lon,'parser_to_use':parser_to_use};
+						} else {
+							prep_form = {'ref_point':document.getElementById("ref_point").value,'a_question':document.getElementById("question").value,'parser_to_use':parser_to_use};
+						}
+						sendQuery(prep_form);
+						return false;
+					});
+				});
+				$(function(){
+					$('#feedback_question_form').submit(function(e){
+						$.ajax({
+							url: "../cgi-bin/save_question_feedback.cgi",
+							type: "post",
+							datatype:"json",
+							data: $("#feedback_question_form").serialize(),
+							success: function(response){
+							},
+							error: function(err) {
+							}
+						});
+						$('#myModal').modal('hide');
+						$("#helpful_inner").toggleClass('hidden', true);
+						$("#helpful_group_more_span").toggleClass('hidden', true);
+						$("#helpful_inner_thanks").toggleClass('hidden', false);
+						$('.feedback_more').removeClass("active");
+						//reset form values
+						document.getElementById("repeat_question").value = "";
+						document.getElementById("area_feedback_text").value = "";
+						document.getElementById("qtype_feedback_text").value = "";
+						document.getElementById("osm_tag_feedback_text").value = "";
+						document.getElementById("overpass_feedback_text").value = "";
+						document.getElementById("mrl_feedback_text").value = "";
+						return false;
+					});
+				});
+				$(function(){
+					$('#different_parser_form').submit(function(e){
+						$('#myModal2').modal('hide');
+                        parser_to_use = document.getElementById("different_parser_location").value
+						return false;
+					});
+				});
+			});
+		</script>		
+  </head>
+	
+<body> 
+		<div class="container" id="nav-container">	
+			<nav class="navbar navbar-inverse">
+				<div class="container-fluid">
+					<div class="navbar-header">
+						<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+							<span class="sr-only">Toggle navigation</span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</button>
+					</div>
+					
+					<div id="navbar" class="navbar-collapse collapse">
+						<ul class="nav navbar-nav">
+							<li class="active"><a href="index.html">
+								Home <span aria-hidden="true"></span>
+							</a></li>
+							<li><a href="faq.html">
+								FAQ <span aria-hidden="true"></span>
+							</a></li>
+						</ul>
+						<ul class="nav navbar-nav navbar-right">
+							<li><a href="about.html">
+								About <span aria-hidden="true"></span>
+							</a></li>
+							<li><a href="feedback.html">
+								Feedback <span aria-hidden="true"></span>
+							</a></li>
+							<li><a href="contact.html">
+								Contact <span aria-hidden="true"></span>
+							</a></li>
+						</ul>
+					</div><!--/.nav-collapse -->
+				</div><!--/.container-fluid -->
+			</nav>
+		</div>
+			
+		<div class="container">
+			<div class="jumbotron" id="jumb">
+				<div class="container">
+					<div class="row center">
+						<div class="col-md-3">
+						</div>
+						<div class="col-md-2"></div>
+						<div class="col-md-4">
+							<h1>NLmaps</h1>
+						</div>
+						<div class="col-md-3"></div>
+					</div> 
+				</div>
+			</div> 
+			
+
+			<div class="main-content">				
+				<div class="featurette">					
+					<div class="featurette-inner">  
+						<h2> Query NLmaps </h2>
+						<div id='spinner' class='spinner'></div>
+						<form role="form" id="question_form" name="question_form">
+							<div class="input-group">
+								<input type="search" list="suggestions" name="a_question" placeholder="Enter question..." class="form-control" id="question" maxlength="160">
+									<datalist id="suggestions">
+										<option value="What is the closest bank with ATMs from the Palace of Holyroodhouse in Edinburgh?">
+										<option value="Where are the closest bank and the closest pharmacy from the Rue Lauriston in Paris?">
+										<option value="Where is the closest Indian or Asian restaurant from the cinema Le Cinaxe in Paris?">
+										<option value="In which street is the closest car dealer from Carrick Knowe in Edinburgh?">
+										<option value="How many schools in Edinburgh have a bus stop less than 200 meters away?">
+										<option value="Which driving school is closest to Mannheimer Straße in Heidelberg and where is it?">
+										<option value="Can you tell me the name of the closest bar or restaurant from the cinema Die Kamera in Heidelberg?">
+										<option value="How many historic sites are in the east of Nantes?">
+										<option value="Which cuisines are there in Heidelberg?">
+										<option value="Where is the closest restaurant or bar from the Hawes Pier in Edinburgh?">
+										<option value="How many locations are in the east of Heidelberg where you can play miniature golf?">
+										<option value="Are there any caves in Osterode and if so how many?">
+									</datalist>
+								<span class="input-group-btn">
+									<button class="trigger btn btn-default" type="submit" id="submit_button">
+									<span aria-hidden="true">Submit</span>
+									</button>
+								</span>
+							</div>
+							<div class="row" id="location_row">
+								<div class="col-md-7">
+									<div class="col-md-4" id="location_text">Reference point (optional):</div>
+									<div class="col-md-4" id="location_box"><input class="form-control input-sm" rows="1" placeholder="a city or country (e.g. Paris)" name="ref_point" id="ref_point" maxlength="50"> </div>
+									<!--<input type="radio" name="get_location" id="get_location"><i id="location_text">Use my location</i>-->
+									<span class="col-md-1" id="or_text">or</span> 
+									<div class="btn-group" id="helpful_group" data-toggle="buttons">
+										<label class="btn btn-primary btn-block get_location"><input id="user_gps_button" type="checkbox" name="get_location" value="get_location"><span>Use my location</span></label>
+									</div>
+								</div>
+							</div>
+						</form>
+						<div id="spelling_suggest"></div> 
+						<div id="answer_output"></div>  
+						<div id="helpful">
+							<div id="helpful_inner_div">
+								<span id="helpful_inner" class="hidden">
+									<span id="helpful_text">Was that helpful?</span>
+									<div class="btn-group" id="helpful_group" data-toggle="buttons">
+										<label class="btn btn-primary feedback"><input type="radio" name="feedback" value="helpful_yes" id="helpful_yes">Yes</label>
+										<label class="btn btn-primary feedback"><input type="radio" name="feedback" value="helpful_no" id="helpful_no">No</label>
+									</div>
+								</span>
+								<span id="helpful_group_more_span" class="hidden">
+									<div class="btn-group" id="helpful_group_more" data-toggle="buttons">
+										<label class="btn btn-primary feedback_more"><input type="radio" name="feedback_more" value="helpful_more" id="helpful_more">More</label>
+									</div>
+								</span>
+							</div>
+							<div id="helpful_inner_thanks" class="hidden">
+								<p>Thank you!</p>
+							</div>
+						</div> 
+                        <div id="different_parser">
+                            <div class="btn-group" id="different_parser_group_more" data-toggle="buttons">
+                                <label class="btn btn-primary different_parser_more"><input type="radio" name="different_parser_more" value="different_parser_more" id="different_parser_more">Select Parser</label>
+                            </div>
+                        </div>
+					</div>		
+				</div>	
+			</div> 				
+			<div id="map"></div>
+	</div>			
+		
+	
+	<!-- Modal -->
+	<div id="myModal" class="modal fade" role="dialog">
+		<div class="modal-dialog">
+
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">Feedback</h4>
+				</div>
+				<div class="modal-body">
+					<p>Could you provide us with some more feedback? <br/> Just fill out as much as you want, every question you answer will help us to improve!</p>
+					<form class="form-horizontal" role="form" id="feedback_question_form" name="feedback_question_form">
+						<input type="hidden" id="repeat_question" name="repeat_question" value="">
+						<p><b><br/>Did we get the location right?</b></p>
+						<div class="entry input-group col-xs-12">        
+              <span class="input-group-btn" id="area_feedback_group" data-toggle="buttons">
+								<label class="btn btn-primary feedback_detailed"><input type="radio" name="area_feedback" value="1">Yes</label>
+								<label class="btn btn-primary feedback_detailed"><input type="radio" name="area_feedback" value="0">No</label>
+              </span>     
+              <input class="form-control" type="text" name="area_feedback_text" id="area_feedback_text">
+            </div>
+						<p><b><br/>Did we select the correct question type? <br/> (Options are: <a href="#" class="" data-toggle="tooltip_count" title="You wanted a count of a set back"><u>count</u></a>, <a href="#" data-toggle="tooltip_count" title="You wanted a list back, e.g a list of names"><u>findkey</u></a>, <a href="#" data-toggle="tooltip_count" title="You wanted the location of objects"><u>latlong</u></a>, <a href="#" data-toggle="tooltip_count" title="You wanted to know if something exists"><u>least</u></a>, <a href="#" data-toggle="tooltip_count" title="You wanted a distance"><u>dist</u></a>)</b></p>
+						<div class="entry input-group col-xs-12">        
+              <span class="input-group-btn" id="area_feedback_group" data-toggle="buttons">
+								<label class="btn btn-primary feedback_detailed"><input type="radio" name="qtype_feedback" value="1">Yes</label>
+								<label class="btn btn-primary feedback_detailed"><input type="radio" name="qtype_feedback" value="0">No</label>
+              </span>     
+              <input class="form-control" type="text" name="qtype_feedback_text" id="qtype_feedback_text">
+            </div>
+						<p><b><br/>Did we select the correct OSM tags?</b></p>
+						<div class="entry input-group col-xs-12">        
+              <span class="input-group-btn" id="osm_tag_feedback_group" data-toggle="buttons">
+								<label class="btn btn-primary feedback_detailed"><input type="radio" name="osm_tag_feedback" value="1">Yes</label>
+								<label class="btn btn-primary feedback_detailed"><input type="radio" name="osm_tag_feedback" value="0">No</label>
+              </span>     
+              <input class="form-control" type="text" name="osm_tag_feedback_text" id="osm_tag_feedback_text">
+            </div>
+						<p><b><br/>Did we obtain the correct the Overpass query?</b></p>
+						<div class="entry input-group col-xs-12">        
+              <span class="input-group-btn" id="overpass_feedback_group" data-toggle="buttons">
+								<label class="btn btn-primary feedback_detailed"><input type="radio" name="overpass_feedback" value="1">Yes</label>
+								<label class="btn btn-primary feedback_detailed"><input type="radio" name="overpass_feedback" value="0">No</label>
+              </span>     
+              <input class="form-control" type="text" name="overpass_feedback_text" id="overpass_feedback_text">
+            </div>
+						<p><b><br/>Did we obtain the correct the MRL formula?</b></p>
+						<div class="entry input-group col-xs-12">        
+              <span class="input-group-btn" id="mrl_feedback_group" data-toggle="buttons">
+								<label class="btn btn-primary feedback_detailed"><input type="radio" name="mrl_feedback" value="1">Yes</label>
+								<label class="btn btn-primary feedback_detailed"><input type="radio" name="mrl_feedback" value="0">No</label>
+              </span>     
+              <input class="form-control" type="text" name="mrl_feedback_text" id="mrl_feedback_text">
+            </div>
+						<br/>
+						<div class="input-group">
+							<span class="input-group-btn">
+								<button class="btn btn-default" type="submit" id="submit_button">
+								<span aria-hidden="true">Submit</span>
+								</button>
+							</span>
+						</div>
+					</form>
+				</div>
+			</div>
+
+		</div>
+	</div>
+    
+    <!-- Modal 2 -->
+	<div id="myModal2" class="modal fade" role="dialog">
+		<div class="modal-dialog">
+
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">Select Different Parser</h4>
+				</div>
+				<div class="modal-body">
+					<p>If you have your own parsing model, you can supply the location here.<br/>Read about how to set up your own parser to work <a href="parser_setup.html">here</a></p>
+					<form class="form-horizontal" role="form" id="different_parser_form" name="different_parser_form">
+						<div class="entry input-group col-xs-12">
+                        <input class="form-control" type="text" name="different_parser_location" id="different_parser_location">
+                        </div>
+						<br/>
+						<div class="input-group">
+							<span class="input-group-btn">
+								<button class="btn btn-default" type="submit" id="submit_button">
+								<span aria-hidden="true">Submit</span>
+								</button>
+							</span>
+						</div>
+					</form>
+				</div>
+			</div>
+
+		</div>
+	</div>
+  </body>
+</html>

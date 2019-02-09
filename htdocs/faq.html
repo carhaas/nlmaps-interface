@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NLmaps</title>
+ 
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+		<link rel="stylesheet" href="main.css"> 
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->		
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap/bootstrap.min.js"></script>
+		<script type="text/javascript" src="js/bootstrap/active_nav.js"></script>
+		<!-- Bootstrap End -->
+		
+		<link rel="shortcut icon" href="favicon.ico"/>
+  </head>
+	
+  <body>
+
+		<div class="container">	
+			<nav class="navbar navbar-inverse">
+				<div class="container-fluid">
+					<div class="navbar-header">
+						<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+							<span class="sr-only">Toggle navigation</span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</button>
+					</div>
+					
+					<div id="navbar" class="navbar-collapse collapse">
+						<ul class="nav navbar-nav">
+							<li><a href="index.html">
+								Home <span aria-hidden="true"></span>
+							</a></li>
+							<li class="active"><a href="faq.html">
+								FAQ <span aria-hidden="true"></span>
+							</a></li>
+						</ul>
+						<ul class="nav navbar-nav navbar-right">
+							<li><a href="about.html">
+								About <span aria-hidden="true"></span>
+							</a></li>
+							<li><a href="feedback.html">
+								Feedback <span aria-hidden="true"></span>
+							</a></li>
+							<li><a href="contact.html">
+								Contact <span aria-hidden="true"></span>
+							</a></li>
+						</ul>
+					</div><!--/.nav-collapse -->
+				</div><!--/.container-fluid -->
+			</nav>
+		</div>
+			
+		<div id="wrap">
+
+			<div class="container">
+				<div class="jumbotron" id="jumb">
+					<div class="container">
+						<div class="row center">
+							<div class="col-md-3">
+							</div>
+							<div class="col-md-2"></div>
+							<div class="col-md-4">
+								<h1>NLmaps</h1>
+							</div>
+							<div class="col-md-3"></div>
+						</div> 
+					</div>
+				</div> 
+
+				<div class="main-content">						
+					<div class="featurette">					
+						<div class="featurette-inner small_font">
+							<h2> FAQ </h2>
+							<h5>What type of questions can the system answer?</h5>							
+							<div class="row">
+								<div class="col-md-5">
+									<table class="table table-striped table-bordered table-condensed table-responsive">
+										<thead><tr><th>Type</th><th>Example</th></tr></thead>
+										<tbody>
+											<tr><td>aggregation</td><td>How many...?</td></tr>
+											<tr><td>GPS location</td><td>Where...?</td></tr>
+											<tr><td>existence</td><td>Is there...?</td></tr>
+											<tr><td>specific key search</td><td>What is the name/website/...?</td></tr>
+											<tr><td>distance</td><td>How far apart...?</td></tr>
+											<tr><td>cardinal direction</td><td>...in the north of...?</td></tr>
+											<tr><td>closest</td><td>closest hotel</td></tr>
+											<tr><td>radius search</td><td>hotels in walking distance</td></tr>
+											<tr><td>exclusive or</td><td>a bar or restaurant</td></tr>
+											<tr><td>union</td><td>a butcher and a bakery</td></tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<h5>What are some example questions that work?</h5>	
+							<ul>
+                                <li>What is the closest bank with ATMs from the Palace of Holyroodhouse in Edinburgh?</li>
+                                <li>Where are the closest bank and the closest pharmacy from the Rue Lauriston in Paris?</li>
+                                <li>Where is the closest Indian or Asian restaurant from the cinema Le Cinaxe in Paris?</li>
+                                <li>In which street is the closest car dealer from Carrick Knowe in Edinburgh?</li>
+                                <li>How many schools in Edinburgh have a bus stop less than 200 meters away?</li>
+                                <li>Which driving school is closest to Mannheimer Straße in Heidelberg and where is it?</li>
+                                <li>Can you tell me the name of the closest bar or restaurant from the cinema Die Kamera in Heidelberg?</li>
+                                <li>How many historic sites are in the east of Nantes?</li>
+                                <li>Which cuisines are there in Heidelberg?</li>
+                                <li>Where is the closest restaurant or bar from the Hawes Pier in Edinburgh?</li>
+                                <li>How many locations are in the east of Heidelberg where you can play miniature golf?</li>
+                                <li>Are there any caves in Osterode and if so how many?</li>
+							</ul>
+							<h5>What is a reference point?</h5>
+							<p>A reference point is an area in which you want to search. It can be a city, a state or a country.
+								If you supply a reference point manually, you can help guide the system to search in the appropriate area.
+								For example, if you live in <i>Heidelberg, Pennsylvania</i> but only use <i>Heidelberg</i> in your question, the system will assume you refer to <i>Heidelberg, Germany</i>.
+								By typing '<i>Heidelberg, Pennsylvania</i>' into the reference point text box, you can ensure that the system finds the location you are interested in.
+								Of course, an even faster option is to click '<i>Use my location</i>' if you want search results about the city you are currently in.</p>
+							<p><i class="warning">Please note: </i>If you supply a reference point or clicked on '<i>Use my location</i>', you should not mention a reference point again in your question!</p>							
+							<h5>Is there anything special about Heidelberg, Paris and Edinburgh?</h5>
+							<p>You might have noticed that Heidelberg, Paris and Edinburgh feature prominently in our example questions.
+							This is because the system was largely trained with questions about these 3 cities. Consequently these are the cities with which the system
+							works the best. However, other cities also work.</p>
+							<h5>The results don't make any sense, why is that?</h5>
+							<p>Because the system is still under development, you may sometimes observe results that don't make any sense.
+							For example you might ask <i>Where</i> something is and instead it counts the number of objects. Please bear with us, these kinks will iron themselves out as
+							as the system learns. In fact, you can help us improve by letting us know about such weird answers by 
+							clicking the '<i>No</i>' button when we ask you '<i>Was that helpful?</i>'</p>
+							<h5>Some objects have less information than others, why is that?</h5>
+							<p>Maybe you have seen some objects (e.g. restaurants) that have a telephone number listed and others that do not.
+							This is because we can only display information that is present in the OpenStreetMap database.</p>
+							<h5>Where can I learn more about the system?</h5>
+							<p>If you want to learn more, you can check out this paper:</p>							
+							<p>
+							<a href='http://www.cl.uni-heidelberg.de/~haas1/' target="_blank">Carolin Haas</a> and <a href='http://www.cl.uni-heidelberg.de/~riezler/' target="_blank">Stefan Riezler</a> (2016).
+							 A Corpus and Semantic Parser for Multilingual Natural Language Querying of OpenStreetMap. 
+							 <em>In Proceedings of the Conference of the North American Chapter of the Association for Computational Linguistics – Human Language Technologies (<a href='http://naacl.org/naacl-hlt-2016/' target="_blank">NAACL HLT 2016</a>), San Diego, CA.</em> [<a href="http://www.cl.uni-heidelberg.de/~haas1/publications/papers/HaasRiezler2016.pdf">pdf</a>] [<a href="HaasRiezler2016.txt" target="_blank">bib</a>].
+							</p>
+						</div>
+					</div>									
+				</div> 				
+			</div>
+
+    
+    </div>
+	
+  </body>
+</html>
